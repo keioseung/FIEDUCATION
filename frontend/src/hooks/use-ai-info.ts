@@ -55,13 +55,4 @@ export function useAIInfoDates() {
   })
 }
 
-export function useFetchAINews() {
-  return useQuery({
-    queryKey: ['ai-news'],
-    queryFn: async () => {
-      const response = await aiInfoAPI.fetchNews()
-      return response.data.news
-    },
-    staleTime: 5 * 60 * 1000, // 5분
-  })
-} 
+ 

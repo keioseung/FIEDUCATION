@@ -14,7 +14,6 @@ import {
   X
 } from 'lucide-react'
 import { useAIInfoDates, useAddAIInfo, useDeleteAIInfo } from '@/hooks/use-ai-info'
-import { useFetchAINews } from '@/hooks/use-ai-info'
 import type { AIInfoItem } from '@/types'
 
 interface SidebarProps {
@@ -31,7 +30,6 @@ function Sidebar({ selectedDate, onDateChange, sessionId }: SidebarProps) {
   const [userRole, setUserRole] = useState<string | null>(null)
   
   const { data: dates } = useAIInfoDates()
-  const { data: news } = useFetchAINews()
   const addAIInfoMutation = useAddAIInfo()
   const deleteAIInfoMutation = useDeleteAIInfo()
 
@@ -192,27 +190,7 @@ function Sidebar({ selectedDate, onDateChange, sessionId }: SidebarProps) {
             </>
           )}
 
-          {/* 최신 뉴스 */}
-          {news && news.length > 0 && (
-            <div>
-              <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                <Brain className="w-5 h-5" />
-                최신 금융 뉴스
-              </h3>
-              <div className="space-y-3">
-                {news.slice(0, 3).map((item: { title: string; content: string }, index: number) => (
-                  <div key={index} className="p-3 bg-white/5 rounded-lg">
-                    <h4 className="text-white font-medium text-sm mb-1 line-clamp-2">
-                      {item.title}
-                    </h4>
-                    <p className="text-white/70 text-xs line-clamp-2">
-                      {item.content}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+
 
           {/* 관리자 메뉴 */}
           {userRole === 'admin' && (
