@@ -40,7 +40,15 @@ class AIInfoItem(BaseModel):
 
 class AIInfoCreate(BaseModel):
     date: str
-    infos: List[AIInfoItem]
+    info1_title: Optional[str] = None
+    info1_content: Optional[str] = None
+    info1_terms: Optional[List[TermItem]] = None
+    info2_title: Optional[str] = None
+    info2_content: Optional[str] = None
+    info2_terms: Optional[List[TermItem]] = None
+    info3_title: Optional[str] = None
+    info3_content: Optional[str] = None
+    info3_terms: Optional[List[TermItem]] = None
 
 class AIInfoResponse(BaseModel):
     id: int
@@ -128,6 +136,11 @@ class BaseContentResponse(BaseModel):
         from_attributes = True 
 
 # Term Schemas
+class TermCreate(BaseModel):
+    term: str
+    description: str
+    category: Optional[str] = None
+
 class TermResponse(BaseModel):
     id: int
     term: str
