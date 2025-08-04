@@ -103,10 +103,10 @@ def get_logs(
         
     except Exception as e:
         print(f"❌ 로그 조회 에러: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal error during log access: {str(e)}"
-        )
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Internal error during log access: {str(e)}"
+            )
 
 @router.get("/simple")
 def get_logs_simple(
@@ -168,9 +168,9 @@ def get_log_stats():
             # 로그 레벨 통계
             log_level = log_data.get('log_level', 'unknown')
             log_levels[log_level] = log_levels.get(log_level, 0) + 1
-        
-        return {
-            "total_logs": total_logs,
+    
+    return {
+        "total_logs": total_logs,
             "log_types": log_types,
             "log_levels": log_levels
         }
@@ -233,6 +233,6 @@ def log_activity(
         
         log_collection.add(activity_log.to_dict())
         print(f"✅ 활동 로그 기록 완료: {action}")
-        
+    
     except Exception as e:
         print(f"❌ 활동 로그 기록 실패: {e}") 

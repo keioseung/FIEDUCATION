@@ -101,7 +101,7 @@ def add_ai_info(ai_info_data: AIInfoCreate):
         
         # 새 AI 정보 생성
         firebase_ai_info = FirebaseAIInfo(
-            date=ai_info_data.date,
+                date=ai_info_data.date,
             info1_title=ai_info_data.info1_title,
             info1_content=ai_info_data.info1_content,
             info1_terms=json.dumps(ai_info_data.info1_terms) if ai_info_data.info1_terms else None,
@@ -116,7 +116,7 @@ def add_ai_info(ai_info_data: AIInfoCreate):
         # Firebase에 저장
         ai_info_collection.document(ai_info_data.date).set(firebase_ai_info.to_dict())
         
-        return {
+            return {
             "message": "AI info added successfully",
             "date": ai_info_data.date
         }

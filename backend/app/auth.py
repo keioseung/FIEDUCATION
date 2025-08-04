@@ -4,12 +4,11 @@ from jose import JWTError, jwt
 import bcrypt
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
 import os
 from dotenv import load_dotenv
 
-from .database import get_db
-from .models import User
+from .firebase_auth import get_user_by_username
+from .firebase_models import FirebaseUser
 
 load_dotenv()
 
@@ -63,10 +62,10 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-def get_current_user(username: str = Depends(verify_token), db: Session = Depends(get_db)) -> User:
+def get_current_user(username: str = Depends(verify_token)) -> FirebaseUser:
     """현재 로그인한 사용자 정보 조회"""
     print(f"🔍 사용자 조회 시작 - 사용자명: {username}")
-    user = db.query(User).filter(User.username == username).first()
+    user = get_user_by_username(username)
     if user is None:
         print(f"❌ 사용자 없음 - {username}")
         raise HTTPException(
@@ -76,7 +75,6 @@ def get_current_user(username: str = Depends(verify_token), db: Session = Depend
     print(f"✅ 사용자 조회 성공 - {user.username} (역할: {user.role})")
     return user
 
-def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
+def get_current_active_user(current_user: FirebaseUser = Depends(get_current_user)) -> FirebaseUser:
     """현재 사용자 정보 조회"""
-    # Supabase 테이블에는 is_active 필드가 없으므로 체크 제거
     return current_user 

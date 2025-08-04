@@ -81,8 +81,8 @@ def get_user_stats(session_id: str):
                     scores.append(progress_data['quiz_score'])
         
         average_score = total_quiz_score / len(scores) if scores else 0
-        
-        return {
+    
+    return {
             "total_days": total_days,
             "total_quiz_score": total_quiz_score,
             "average_score": round(average_score, 2)

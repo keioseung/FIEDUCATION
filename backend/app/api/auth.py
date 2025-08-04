@@ -43,15 +43,15 @@ def register_user(user_data: UserCreate, request: Request):
         
         # 회원가입 로그 기록 (에러 무시)
         try:
-            log_activity(
-                action="회원가입",
-                details=f"새 사용자가 등록되었습니다. 역할: {user_data.role}",
-                log_type="user",
-                log_level="info",
+    log_activity(
+        action="회원가입",
+        details=f"새 사용자가 등록되었습니다. 역할: {user_data.role}",
+        log_type="user",
+        log_level="info",
                 user_id=user_id,
                 username=firebase_user.username,
-                ip_address=request.client.host if request.client else None
-            )
+        ip_address=request.client.host if request.client else None
+    )
         except Exception as log_error:
             print(f"⚠️ 로그 기록 실패 (무시): {log_error}")
         
@@ -146,39 +146,39 @@ def login_user(user_credentials: UserLogin, request: Request):
         
         if not user:
             print("❌ 인증 실패")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect username or password",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        
-        # 액세스 토큰 생성
-        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(
-            data={"sub": user.username}, expires_delta=access_token_expires
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
         )
+    
+    # 액세스 토큰 생성
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
         print(f"🎫 토큰 생성 완료: {access_token[:20]}...")
-        
+    
         # 로그인 로그 기록 (에러 무시)
         try:
-            log_activity(
-                action="로그인",
-                details=f"사용자가 성공적으로 로그인했습니다. 역할: {user.role}",
-                log_type="user",
-                log_level="success",
+    log_activity(
+        action="로그인",
+        details=f"사용자가 성공적으로 로그인했습니다. 역할: {user.role}",
+        log_type="user",
+        log_level="success",
                 user_id=user.user_id,
-                username=user.username,
-                ip_address=request.client.host if request.client else None
-            )
+        username=user.username,
+        ip_address=request.client.host if request.client else None
+    )
         except Exception as log_error:
             print(f"⚠️ 로그 기록 실패 (무시): {log_error}")
-        
+    
         print("✅ 로그인 성공")
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "user": user
-        }
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user
+    }
         
     except HTTPException:
         raise
