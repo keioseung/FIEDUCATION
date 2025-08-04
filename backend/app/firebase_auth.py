@@ -46,21 +46,33 @@ def verify_token(token: str) -> Optional[str]:
 def get_user_by_username(username: str) -> Optional[FirebaseUser]:
     """사용자명으로 사용자 조회"""
     try:
+        print(f"🔍 사용자 조회 시작: {username}")
+        
         users_ref = get_collection('users')
         if not users_ref:
+            print("❌ users 컬렉션 참조를 가져올 수 없습니다")
             return None
+        
+        print(f"✅ users 컬렉션 참조 성공")
         
         # 사용자명으로 쿼리
         query = users_ref.where('username', '==', username).limit(1)
+        print(f"🔍 쿼리 실행: username == {username}")
+        
         docs = query.stream()
         
         for doc in docs:
             user_data = doc.to_dict()
+            print(f"✅ 사용자 발견: {username} (ID: {doc.id})")
             return FirebaseUser.from_dict(user_data, doc.id)
         
+        print(f"ℹ️ 사용자를 찾을 수 없음: {username}")
         return None
     except Exception as e:
         print(f"❌ 사용자 조회 실패: {e}")
+        print(f"🔍 에러 타입: {type(e)}")
+        import traceback
+        print(f"📋 상세 에러: {traceback.format_exc()}")
         return None
 
 def get_user_by_id(user_id: str) -> Optional[FirebaseUser]:
@@ -83,9 +95,14 @@ def get_user_by_id(user_id: str) -> Optional[FirebaseUser]:
 def create_user(user: FirebaseUser) -> Optional[str]:
     """새 사용자 생성"""
     try:
+        print(f"🔍 사용자 생성 시작: {user.username}")
+        
         users_ref = get_collection('users')
         if not users_ref:
+            print("❌ users 컬렉션 참조를 가져올 수 없습니다")
             return None
+        
+        print(f"✅ users 컬렉션 참조 성공")
         
         # 사용자명 중복 확인
         existing_user = get_user_by_username(user.username)
@@ -93,16 +110,25 @@ def create_user(user: FirebaseUser) -> Optional[str]:
             print(f"❌ 사용자명 중복: {user.username}")
             return None
         
+        print(f"✅ 사용자명 중복 확인 완료: {user.username}")
+        
         # 새 사용자 문서 생성
         user_data = user.to_dict()
         user_data['created_at'] = datetime.utcnow()
+        
+        print(f"📝 사용자 데이터 준비 완료: {user_data}")
+        
         doc_ref = users_ref.add(user_data)
         
         print(f"✅ 사용자 생성 성공: {user.username}")
+        print(f"📄 생성된 문서 ID: {doc_ref[1].id}")
         return doc_ref[1].id  # 생성된 문서 ID 반환
         
     except Exception as e:
         print(f"❌ 사용자 생성 실패: {e}")
+        print(f"🔍 에러 타입: {type(e)}")
+        import traceback
+        print(f"📋 상세 에러: {traceback.format_exc()}")
         return None
 
 def update_user(user_id: str, user_data: dict) -> bool:

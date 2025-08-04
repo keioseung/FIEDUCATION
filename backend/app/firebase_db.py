@@ -7,14 +7,26 @@ from typing import Optional
 def initialize_firebase():
     """Firebase Admin SDK 초기화"""
     try:
+        print("🚀 Firebase 초기화 시작...")
+        
         # 서비스 계정 키 파일 경로
         service_account_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), 
             'firebase-service-account.json'
         )
         
+        print(f"📁 서비스 계정 키 경로: {service_account_path}")
+        
+        # 파일 존재 확인
+        if not os.path.exists(service_account_path):
+            print(f"❌ 서비스 계정 키 파일이 존재하지 않습니다: {service_account_path}")
+            return False
+        
+        print(f"✅ 서비스 계정 키 파일 발견")
+        
         # 이미 초기화되었는지 확인
         if not firebase_admin._apps:
+            print("🔧 Firebase Admin SDK 초기화 중...")
             cred = credentials.Certificate(service_account_path)
             firebase_admin.initialize_app(cred)
             print("✅ Firebase Admin SDK 초기화 완료")
@@ -24,6 +36,9 @@ def initialize_firebase():
         return True
     except Exception as e:
         print(f"❌ Firebase 초기화 실패: {e}")
+        print(f"🔍 에러 타입: {type(e)}")
+        import traceback
+        print(f"📋 상세 에러: {traceback.format_exc()}")
         return False
 
 # Firestore 클라이언트 가져오기
