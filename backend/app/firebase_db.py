@@ -1,6 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
+import json
 from typing import Optional
 
 # Firebase 초기화 (한 번만 실행)
@@ -9,31 +10,52 @@ def initialize_firebase():
     try:
         print("🚀 Firebase 초기화 시작...")
         
-        # 서비스 계정 키 파일 경로
-        service_account_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), 
-            'firebase-service-account.json'
-        )
-        
-        print(f"📁 서비스 계정 키 경로: {service_account_path}")
-        
-        # 파일 존재 확인
-        if not os.path.exists(service_account_path):
-            print(f"❌ 서비스 계정 키 파일이 존재하지 않습니다: {service_account_path}")
-            return False
-        
-        print(f"✅ 서비스 계정 키 파일 발견")
-        
         # 이미 초기화되었는지 확인
-        if not firebase_admin._apps:
-            print("🔧 Firebase Admin SDK 초기화 중...")
-            cred = credentials.Certificate(service_account_path)
-            firebase_admin.initialize_app(cred)
-            print("✅ Firebase Admin SDK 초기화 완료")
-        else:
+        if firebase_admin._apps:
             print("ℹ️ Firebase Admin SDK가 이미 초기화되어 있습니다")
-            
-        return True
+            return True
+        
+        # 환경변수에서 서비스 계정 키 읽기 시도
+        service_account_json = os.getenv('FIREBASE_SERVICE_ACCOUNT')
+        if service_account_json:
+            try:
+                service_account_info = json.loads(service_account_json)
+                cred = credentials.Certificate(service_account_info)
+                firebase_admin.initialize_app(cred)
+                print("✅ Firebase Admin SDK 초기화 완료 (환경변수)")
+                return True
+            except json.JSONDecodeError as e:
+                print(f"❌ Firebase 서비스 계정 JSON 파싱 실패: {e}")
+                return False
+        
+        # 파일에서 읽기 시도 (여러 가능한 경로)
+        possible_paths = [
+            '/app/firebase-service-account.json',  # Railway 컨테이너 경로
+            os.path.join(os.path.dirname(os.path.dirname(__file__)), 'firebase-service-account.json'),
+            './firebase-service-account.json',
+            'firebase-service-account.json',
+            '/tmp/firebase-service-account.json'
+        ]
+        
+        for service_account_path in possible_paths:
+            print(f"🔍 경로 확인 중: {service_account_path}")
+            if os.path.exists(service_account_path):
+                try:
+                    print(f"✅ 파일 발견: {service_account_path}")
+                    cred = credentials.Certificate(service_account_path)
+                    firebase_admin.initialize_app(cred)
+                    print(f"✅ Firebase Admin SDK 초기화 완료 (파일: {service_account_path})")
+                    return True
+                except Exception as e:
+                    print(f"❌ Firebase 초기화 실패 (파일: {service_account_path}): {e}")
+                    continue
+        
+        print("❌ Firebase 서비스 계정 키를 찾을 수 없습니다")
+        print("가능한 해결책:")
+        print("1. Railway 환경변수에 FIREBASE_SERVICE_ACCOUNT 설정")
+        print("2. firebase-service-account.json 파일을 Railway Files에 업로드")
+        return False
+        
     except Exception as e:
         print(f"❌ Firebase 초기화 실패: {e}")
         print(f"🔍 에러 타입: {type(e)}")
