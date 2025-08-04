@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 import os
 
 from .api import ai_info, quiz, prompt, base_content, term, auth, logs, system
+from .firebase_db import initialize_firebase
 
 app = FastAPI()
 
@@ -17,21 +18,32 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+# Firebase 초기화
+@app.on_event("startup")
+async def startup_event():
+    """애플리케이션 시작 시 Firebase 초기화"""
+    print("🚀 애플리케이션 시작 - Firebase 초기화 중...")
+    if initialize_firebase():
+        print("✅ Firebase 초기화 완료")
+    else:
+        print("❌ Firebase 초기화 실패")
+
 # 헬스체크 엔드포인트
 @app.get("/")
 async def root():
-    return {"message": "AI Mastery Hub Backend is running", "status": "healthy", "version": "1.0.0"}
+    return {"message": "AI Mastery Hub Backend is running", "status": "healthy", "version": "1.0.0", "database": "firebase"}
 
 @app.get("/health")
 async def health_check():
     try:
-        from .database import engine
-        # 데이터베이스 연결 테스트
-        with engine.connect() as conn:
-            result = conn.execute("SELECT 1")
-        return {"status": "healthy", "database": "connected", "timestamp": "2024-01-01T00:00:00Z"}
+        from .firebase_db import test_connection
+        # Firebase 연결 테스트
+        if test_connection():
+            return {"status": "healthy", "database": "firebase_connected", "timestamp": "2024-01-01T00:00:00Z"}
+        else:
+            return {"status": "unhealthy", "database": "firebase_disconnected", "error": "Firebase connection failed", "timestamp": "2024-01-01T00:00:00Z"}
     except Exception as e:
-        return {"status": "unhealthy", "database": "disconnected", "error": str(e), "timestamp": "2024-01-01T00:00:00Z"}
+        return {"status": "unhealthy", "database": "firebase_error", "error": str(e), "timestamp": "2024-01-01T00:00:00Z"}
 
 @app.options("/{path:path}")
 async def options_handler(path: str):
