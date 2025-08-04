@@ -55,7 +55,14 @@ def register_user(user_data: UserCreate, request: Request):
         except Exception as log_error:
             print(f"⚠️ 로그 기록 실패 (무시): {log_error}")
         
-        return firebase_user
+        # UserResponse 스키마에 맞는 형태로 반환
+        return {
+            "id": int(user_id) if user_id.isdigit() else 1,  # Firebase ID를 정수로 변환
+            "username": firebase_user.username,
+            "email": firebase_user.email,
+            "role": firebase_user.role,
+            "created_at": firebase_user.created_at
+        }
         
     except HTTPException:
         raise

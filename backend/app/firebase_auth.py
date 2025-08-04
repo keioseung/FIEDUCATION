@@ -95,6 +95,7 @@ def create_user(user: FirebaseUser) -> Optional[str]:
         
         # 새 사용자 문서 생성
         user_data = user.to_dict()
+        user_data['created_at'] = datetime.utcnow()
         doc_ref = users_ref.add(user_data)
         
         print(f"✅ 사용자 생성 성공: {user.username}")
