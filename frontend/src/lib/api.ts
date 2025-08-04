@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_BASE_URL = 'https://mcp-hi.up.railway.app'  // Railway 배포용 백엔드 URL
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
