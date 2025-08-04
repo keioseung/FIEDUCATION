@@ -1,62 +1,58 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, Response
 from typing import List
+from datetime import datetime
 
-from ..database import get_db
-from ..models import BaseContent
+from ..firebase_db import get_collection, get_document
 from ..schemas import BaseContentCreate, BaseContentResponse
 
 router = APIRouter()
 
 @router.get("/", response_model=List[BaseContentResponse])
-def get_all_base_contents(db: Session = Depends(get_db)):
-    contents = db.query(BaseContent).order_by(BaseContent.created_at.desc()).all()
-    return contents
+def get_all_base_content():
+    """모든 기본 컨텐츠 조회"""
+    try:
+        content_collection = get_collection('base_content')
+        if not content_collection:
+            return []
+        
+        docs = content_collection.order_by('created_at', direction='desc').stream()
+        contents = []
+        for doc in docs:
+            content_data = doc.to_dict()
+            content_data['id'] = doc.id
+            contents.append(content_data)
+        
+        return contents
+    except Exception as e:
+        print(f"Error in get_all_base_content: {e}")
+        return []
+
+@router.post("/", response_model=BaseContentResponse)
+def add_base_content(content_data: BaseContentCreate):
+    """새 기본 컨텐츠 추가"""
+    try:
+        content_collection = get_collection('base_content')
+        if not content_collection:
+            raise HTTPException(status_code=500, detail="Database connection failed")
+        
+        content_dict = {
+            'title': content_data.title,
+            'content': content_data.content,
+            'category': content_data.category,
+            'created_at': datetime.now().isoformat()
+        }
+        
+        doc_ref = content_collection.add(content_dict)
+        content_dict['id'] = doc_ref[1].id
+        
+        return content_dict
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error in add_base_content: {e}")
+        raise HTTPException(status_code=500, detail="Failed to add base content")
 
 @router.options("/")
 def options_base_content():
-    return Response(status_code=200)
-
-@router.post("/", response_model=BaseContentResponse)
-def add_base_content(content_data: BaseContentCreate, db: Session = Depends(get_db)):
-    from datetime import datetime
-    
-    db_content = BaseContent(
-        title=content_data.title,
-        content=content_data.content,
-        category=content_data.category,
-        created_at=datetime.now()
-    )
-    db.add(db_content)
-    db.commit()
-    db.refresh(db_content)
-    return db_content
-
-@router.put("/{content_id}", response_model=BaseContentResponse)
-def update_base_content(content_id: int, content_data: BaseContentCreate, db: Session = Depends(get_db)):
-    content = db.query(BaseContent).filter(BaseContent.id == content_id).first()
-    if not content:
-        raise HTTPException(status_code=404, detail="Base content not found")
-    
-    content.title = content_data.title
-    content.content = content_data.content
-    content.category = content_data.category
-    
-    db.commit()
-    db.refresh(content)
-    return content
-
-@router.delete("/{content_id}")
-def delete_base_content(content_id: int, db: Session = Depends(get_db)):
-    content = db.query(BaseContent).filter(BaseContent.id == content_id).first()
-    if not content:
-        raise HTTPException(status_code=404, detail="Base content not found")
-    
-    db.delete(content)
-    db.commit()
-    return {"message": "Base content deleted successfully"}
-
-@router.get("/category/{category}", response_model=List[BaseContentResponse])
-def get_base_contents_by_category(category: str, db: Session = Depends(get_db)):
-    contents = db.query(BaseContent).filter(BaseContent.category == category).all()
-    return contents 
+    """OPTIONS 요청 처리"""
+    return {"message": "OK"} 

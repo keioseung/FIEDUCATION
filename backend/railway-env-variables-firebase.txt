@@ -1,0 +1,19 @@
+# Firebase 기반 백엔드 Railway 환경변수 설정
+# Railway 대시보드 > 프로젝트 > Variables 탭에서 아래 변수들을 추가하세요
+
+# Security
+SECRET_KEY=your-secret-key-here
+
+# API Configuration
+API_HOST=0.0.0.0
+API_PORT=8000
+
+# CORS Settings (프론트엔드 URL 포함)
+ALLOWED_ORIGINS=https://finance1-production.up.railway.app,http://localhost:3000
+
+# Firebase 설정
+# Firebase 서비스 계정 키는 Railway의 Files 섹션에서 업로드:
+# 1. Variables 탭 → Files 섹션
+# 2. "Add File" 클릭
+# 3. 파일명: firebase-service-account.json
+# 4. Firebase 콘솔에서 다운로드한 서비스 계정 키 JSON 내용 붙여넣기 
