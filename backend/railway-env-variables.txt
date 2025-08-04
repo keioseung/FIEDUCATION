@@ -1,0 +1,15 @@
+# 백엔드 Railway 환경변수 설정
+# Railway 대시보드 > 프로젝트 > Variables 탭에서 아래 변수들을 추가하세요
+
+# Database Configuration
+DATABASE_URL=postgresql://postgres.xazsbitfnpmfranrgfjw:rhdqngo123@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres
+
+# Security
+SECRET_KEY=your-secret-key-here
+
+# API Configuration
+API_HOST=0.0.0.0
+API_PORT=8000
+
+# CORS Settings (프론트엔드 URL 포함)
+ALLOWED_ORIGINS=https://finance1-production.up.railway.app,http://localhost:3000 

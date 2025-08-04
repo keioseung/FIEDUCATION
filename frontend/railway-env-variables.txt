@@ -1,0 +1,6 @@
+# 프론트엔드 Railway 환경변수 설정
+# Railway 대시보드 > 프로젝트 > Variables 탭에서 아래 변수들을 추가하세요
+
+NEXT_PUBLIC_API_URL=https://mcp-hi.up.railway.app
+NEXT_PUBLIC_APP_NAME=AI Mastery Hub
+NEXT_PUBLIC_APP_VERSION=1.0.0 
